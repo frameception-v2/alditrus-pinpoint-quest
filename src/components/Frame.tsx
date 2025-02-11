@@ -22,17 +22,54 @@ import { createStore } from "mipd";
 import { Label } from "~/components/ui/label";
 import { PROJECT_TITLE } from "~/lib/constants";
 
-function ExampleCard() {
+function PinballGame() {
+  const [score, setScore] = useState(0);
+  const [currentMission, setCurrentMission] = useState(0);
+  const [missions, setMissions] = useState(PINBALL_MISSIONS);
+
+  useEffect(() => {
+    setMissions(PINBALL_MISSIONS);
+  }, []);
+
+  const handleLaunchBall = useCallback(() => {
+    // Simulate pinball gameplay with random points
+    const newPoints = Math.floor(Math.random() * PINBALL_POINTS.MULTIBALL) + PINBALL_POINTS.FLIPPER_HIT;
+    setScore(prev => {
+      const newScore = prev + newPoints;
+      // Check mission completion
+      if (newScore >= missions[currentMission]?.target) {
+        setCurrentMission(prev => Math.min(prev + 1, missions.length - 1));
+      }
+      return newScore;
+    });
+  }, [currentMission, missions]);
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Welcome to the Frame Template</CardTitle>
+        <CardTitle>Pinpoint Quest 🕹️</CardTitle>
         <CardDescription>
-          This is an example card that you can customize or remove
+          Score: {score} | Mission: {missions[currentMission]?.name}
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <Label>Place content in a Card here.</Label>
+      <CardContent className="flex flex-col gap-4">
+        <div className="flex justify-between items-center">
+          <Label>Current Target: {missions[currentMission]?.target}</Label>
+          <Label>Reward: 🪙{missions[currentMission]?.reward}</Label>
+        </div>
+        <button 
+          onClick={handleLaunchBall}
+          className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+        >
+          LAUNCH BALL 🚀
+        </button>
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          {score >= missions[currentMission]?.target ? (
+            "Mission Complete! Keep playing!"
+          ) : (
+            "Hit bumpers and ramps to score points!"
+          )}
+        </div>
       </CardContent>
     </Card>
   );
@@ -140,7 +177,7 @@ export default function Frame() {
         <h1 className="text-2xl font-bold text-center mb-4 text-gray-700 dark:text-gray-300">
           {PROJECT_TITLE}
         </h1>
-        <ExampleCard />
+        <PinballGame />
       </div>
     </div>
   );
